@@ -46,6 +46,8 @@ For a game on the Docker host, set `FACTORIO_HOST=host.docker.internal` and make
 
 MCP authentication grants access to game tools. The separate Codex/ChatGPT login authorizes the assistant's model usage; neither credential is a replacement for the other.
 
+The Kalteew fork adds factory-scale inspection and control: `factory_snapshot` for pollution, power, production, logistics and research; `entity_diagnostics` for fluids, circuits, logistics and machine control; `logistics_set_requests`, `circuit_connect` and `train_snapshot` for the first network-level actions. These handlers remain native Factorio Lua and work through the same MCP, dashboard and RCON contract.
+
 ## Use your own harness
 
 For **Claude Code**, keep the HTTP service running with `bun run start`, then run `bun run claude` from another terminal. The launcher loads the local server token (or `COMPANION_ACCESS_TOKEN` from `.env`) and attaches the HTTP MCP server to your existing Claude Code account. It explicitly selects the modern MCP client; the tested Claude Code version is 2.1.270. The panel stays available for world observation and logs. Leave its Codex agent paused while controlling companions from your harness.

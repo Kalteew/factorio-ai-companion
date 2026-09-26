@@ -2519,7 +2519,8 @@
               "quality": {
                 "type": "string",
                 "minLength": 1,
-                "maxLength": 100
+                "maxLength": 100,
+                "description": "Quality prototype; defaults to normal for Factorio 2.0 compatibility"
               }
             },
             "required": [
@@ -2631,6 +2632,249 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
+        }
+      },
+      "required": [
+        "companionId"
+      ],
+    "additionalProperties": false
+    }
+  },
+  "entity_diagnostics": {
+    "description": "Inspect the nearest machine or network entity: fluids, circuit signals, logistic sections, energy and control behavior.",
+    "execution": "game",
+    "effect": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "x": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 16,
+          "default": 2
+        },
+        "includeFluid": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeCircuits": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeLogistics": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeElectric": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeControl": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "companionId",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "logistics_set_requests": {
+    "description": "Set or clear item requests on the nearest manual logistic section.",
+    "execution": "game",
+    "effect": "act",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "x": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 16,
+          "default": 2
+        },
+        "section": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 1
+        },
+        "clearAll": {
+          "type": "boolean",
+          "default": false
+        },
+        "requests": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "min": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "quality": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "item"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "companionId",
+        "x",
+        "y",
+        "requests"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "circuit_connect": {
+    "description": "Connect or disconnect two nearby circuit endpoints with red or green wire.",
+    "execution": "game",
+    "effect": "act",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "x1": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y1": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "x2": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y2": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "wire": {
+          "type": "string",
+          "enum": [
+            "red",
+            "green"
+          ],
+          "default": "red"
+        },
+        "disconnect": {
+          "type": "boolean",
+          "default": false
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 16,
+          "default": 2
+        }
+      },
+      "required": [
+        "companionId",
+        "x1",
+        "y1",
+        "x2",
+        "y2"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "train_snapshot": {
+    "description": "Inspect trains, rolling stock, routes and schedules around the companion.",
+    "execution": "game",
+    "effect": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "x": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 512,
+          "default": 128
+        },
+        "includeSchedule": {
+          "type": "boolean",
+          "default": false
         }
       },
       "required": [

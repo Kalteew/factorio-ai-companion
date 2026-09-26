@@ -247,6 +247,87 @@ try {
     [],
     "Machine inspection must not emit Lua errors",
   );
+  const networkFixture = await rcon.sendCommand(
+    '/sc local s=game.surfaces[1]; local t=s.create_entity{name="storage-tank",position={12,2},force="player"}; t.insert_fluid{name="crude-oil",amount=250}; local r=s.create_entity{name="requester-chest",position={16,2},force="player"}; local p1=s.create_entity{name="small-electric-pole",position={4,0},force="player"}; local p2=s.create_entity{name="small-electric-pole",position={6,0},force="player"}; local ok,c1=pcall(function() return p1.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); local ok2,c2=pcall(function() return p2.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); if ok and ok2 and c1 and c2 then c1.connect_to(c2,false) end; rcon.print("network-fixture-ready")',
+  );
+  assert.match(networkFixture.data, /network-fixture-ready/);
+  const tankDiagnostics = await call("entity_diagnostics", {
+    companionId: 1,
+    x: 12,
+    y: 2,
+    includeFluid: true,
+    includeCircuits: false,
+    includeLogistics: false,
+    includeElectric: false,
+    includeControl: false,
+  });
+  assert.equal(tankDiagnostics.entity.name, "storage-tank");
+  assert.equal(tankDiagnostics.fluid.contents["crude-oil"], 250);
+  const poleDiagnostics = await call("entity_diagnostics", {
+    companionId: 1,
+    x: 4,
+    y: 0,
+    includeFluid: false,
+    includeCircuits: true,
+    includeLogistics: false,
+    includeElectric: true,
+    includeControl: false,
+  });
+  assert.equal(poleDiagnostics.entity.name, "small-electric-pole");
+  assert.equal(typeof poleDiagnostics.electric.network_id, "number");
+  assert.equal(typeof poleDiagnostics.circuits, "object");
+  const request = await call("logistics_set_requests", {
+    companionId: 1,
+    x: 16,
+    y: 2,
+    clearAll: true,
+    requests: [{ item: "iron-plate", count: 20 }],
+  });
+  assert.equal(request.entity, "requester-chest");
+  assert.equal(request.changed, 1);
+  const requesterDiagnostics = await call("entity_diagnostics", {
+    companionId: 1,
+    x: 16,
+    y: 2,
+    includeFluid: false,
+    includeCircuits: false,
+    includeLogistics: true,
+    includeElectric: false,
+    includeControl: false,
+  });
+  assert.equal(requesterDiagnostics.entity.name, "requester-chest");
+  assert.equal(
+    requesterDiagnostics.logistics?.some((point: any) =>
+      point.sections?.some((section: any) =>
+        section.filters?.some((filter: any) => filter?.value?.name === "iron-plate"),
+      ),
+    ),
+    true,
+    JSON.stringify(requesterDiagnostics),
+  );
+  const disconnected = await call("circuit_connect", {
+    companionId: 1,
+    x1: 4,
+    y1: 0,
+    x2: 6,
+    y2: 0,
+    wire: "red",
+    disconnect: true,
+  });
+  assert.equal(disconnected.changed, true, JSON.stringify(disconnected));
+  const reconnected = await call("circuit_connect", {
+    companionId: 1,
+    x1: 4,
+    y1: 0,
+    x2: 6,
+    y2: 0,
+    wire: "red",
+  });
+  assert.equal(reconnected.changed, true, JSON.stringify(reconnected));
+  const trains = await call("train_snapshot", { companionId: 1, radius: 32 });
+  assert.equal(typeof trains.count, "number");
+  assert.ok(trains.count === 0 || Array.isArray(trains.trains), JSON.stringify(trains));
+  assert.deepEqual((await game.observe(1)).errors, [], "Network diagnostics must not emit Lua errors");
   await rcon.sendCommand(
     '/sc local s=game.surfaces[1]; s.create_entity{name="tree-01",position={-6,0}}; rcon.print("tree-ready")',
   );
