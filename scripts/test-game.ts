@@ -121,6 +121,17 @@ try {
   assert.equal(snapshot.version, (await import("../package.json")).default.version);
   assert.equal(snapshot.companions.length, 1);
   assert.deepEqual(snapshot.errors, [], JSON.stringify(snapshot.errors));
+  const factory = await call("factory_snapshot", {
+    companionId: 1,
+    includeLogisticsContents: true,
+    includeEntities: true,
+  });
+  assert.equal(factory.surface, "nauvis");
+  assert.equal(factory.force, "player");
+  assert.equal(typeof factory.pollution.total, "number");
+  assert.equal(typeof factory.map.resources["iron-ore"], "number");
+  assert.equal(typeof factory.production.items.input, "object");
+  assert.equal(typeof factory.logistics.networks, "object");
   await call("chat_say", { companionId: 0, message: '¡Hola! «áéíóú» \\ "texto"\nsegunda línea' });
   const chat1 = await call("chat_poll", { afterId: 0 });
   const chat2 = await call("chat_poll", { afterId: 0 });

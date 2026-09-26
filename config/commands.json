@@ -1493,6 +1493,43 @@
       "additionalProperties": false
     }
   },
+  "factory_snapshot": {
+    "description": "Read global factory health for a surface: pollution, resources, research, production statistics, power statistics and logistic networks.",
+    "execution": "game",
+    "effect": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "0: use the first connected player; otherwise the companion's force and surface"
+        },
+        "surface": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Optional Factorio surface name"
+        },
+        "includeLogisticsContents": {
+          "default": false,
+          "type": "boolean",
+          "description": "Include every item currently available in each logistic network"
+        },
+        "includeEntities": {
+          "default": false,
+          "type": "boolean",
+          "description": "Include global counts for major factory entity types"
+        }
+      },
+      "required": [
+        "companionId"
+      ],
+      "additionalProperties": false
+    }
+  },
   "gather": {
     "description": "Autonomously find reachable resources, walk and mine the requested number of NEW items. Poll gather_status; do not issue movement while active.",
     "execution": "game",
