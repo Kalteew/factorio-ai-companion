@@ -46,7 +46,7 @@ For a game on the Docker host, set `FACTORIO_HOST=host.docker.internal` and make
 
 MCP authentication grants access to game tools. The separate Codex/ChatGPT login authorizes the assistant's model usage; neither credential is a replacement for the other.
 
-The Kalteew fork adds factory-scale inspection and control: `factory_snapshot` for pollution, power, production, logistics and research; `entity_diagnostics` for fluids, circuits, logistics and machine control; `logistics_set_requests`, `circuit_connect` and `train_snapshot` for the first network-level actions. These handlers remain native Factorio Lua and work through the same MCP, dashboard and RCON contract.
+The Kalteew fork adds factory-scale inspection and control: `factory_snapshot` for pollution, power, production, logistics and research; `entity_diagnostics` for fluids, circuits, logistics and machine control; `logistics_set_requests`, `circuit_connect`, `train_snapshot`, `train_set_schedule`, `fluid_transfer`, `maintenance_order` and `space_snapshot` for network-level actions. These handlers remain native Factorio Lua and work through the same MCP, dashboard and RCON contract.
 
 ## Use your own harness
 

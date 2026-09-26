@@ -248,7 +248,7 @@ try {
     "Machine inspection must not emit Lua errors",
   );
   const networkFixture = await rcon.sendCommand(
-    '/sc local s=game.surfaces[1]; local t=s.create_entity{name="storage-tank",position={12,2},force="player"}; t.insert_fluid{name="crude-oil",amount=250}; local r=s.create_entity{name="requester-chest",position={16,2},force="player"}; local p1=s.create_entity{name="small-electric-pole",position={4,0},force="player"}; local p2=s.create_entity{name="small-electric-pole",position={6,0},force="player"}; local ok,c1=pcall(function() return p1.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); local ok2,c2=pcall(function() return p2.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); if ok and ok2 and c1 and c2 then c1.connect_to(c2,false) end; rcon.print("network-fixture-ready")',
+    '/sc local s=game.surfaces[1]; local t=s.create_entity{name="storage-tank",position={12,2},force="player"}; t.insert_fluid{name="crude-oil",amount=250}; local source=s.create_entity{name="storage-tank",position={3,3},force="player"}; source.insert_fluid{name="crude-oil",amount=250}; s.create_entity{name="storage-tank",position={8,3},force="player"}; local r=s.create_entity{name="requester-chest",position={16,2},force="player"}; local p1=s.create_entity{name="small-electric-pole",position={4,0},force="player"}; local p2=s.create_entity{name="small-electric-pole",position={6,0},force="player"}; local ok,c1=pcall(function() return p1.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); local ok2,c2=pcall(function() return p2.get_wire_connector(defines.wire_connector_id.circuit_red,true) end); if ok and ok2 and c1 and c2 then c1.connect_to(c2,false) end; rcon.print("network-fixture-ready")',
   );
   assert.match(networkFixture.data, /network-fixture-ready/);
   const tankDiagnostics = await call("entity_diagnostics", {
@@ -305,6 +305,27 @@ try {
     true,
     JSON.stringify(requesterDiagnostics),
   );
+  const fluidTransfer = await call("fluid_transfer", {
+    companionId: 1,
+    fromX: 3,
+    fromY: 3,
+    toX: 8,
+    toY: 3,
+    fluid: "crude-oil",
+    amount: 100,
+  });
+  assert.equal(fluidTransfer.inserted, 100, JSON.stringify(fluidTransfer));
+  const targetFluid = await call("entity_diagnostics", {
+    companionId: 1,
+    x: 8,
+    y: 3,
+    includeFluid: true,
+    includeCircuits: false,
+    includeLogistics: false,
+    includeElectric: false,
+    includeControl: false,
+  });
+  assert.equal(targetFluid.fluid.contents["crude-oil"], 100);
   const disconnected = await call("circuit_connect", {
     companionId: 1,
     x1: 4,
@@ -327,6 +348,39 @@ try {
   const trains = await call("train_snapshot", { companionId: 1, radius: 32 });
   assert.equal(typeof trains.count, "number");
   assert.ok(trains.count === 0 || Array.isArray(trains.trains), JSON.stringify(trains));
+  const space = await call("space_snapshot", { companionId: 1 });
+  assert.equal(space.surfaces.some((surface: any) => surface.name === "nauvis"), true);
+  const missingTrain = await game.execute(
+    "train_set_schedule",
+    { companionId: 1, trainId: 999999, clear: true },
+    "test",
+  );
+  assert.equal(missingTrain.success, false, JSON.stringify(missingTrain));
+  assert.match(missingTrain.error || "", /Train not found/);
+  await rcon.sendCommand(
+    '/sc local s=game.surfaces[1]; s.create_entity{name="wooden-chest",position={0.5,4.5},force="player"}; rcon.print("maintenance-fixture-ready")',
+  );
+  const marked = await call("maintenance_order", {
+    companionId: 1,
+    action: "deconstruct",
+    x1: -1,
+    y1: 3,
+    x2: 2,
+    y2: 6,
+  });
+  assert.ok(marked.changed >= 1, JSON.stringify(marked));
+  const cancelled = await call("maintenance_order", {
+    companionId: 1,
+    action: "cancel_deconstruct",
+    x1: -1,
+    y1: 3,
+    x2: 2,
+    y2: 6,
+  });
+  assert.ok(cancelled.changed >= 1, JSON.stringify(cancelled));
+  await rcon.sendCommand(
+    '/sc local s=game.surfaces[1]; for _,e in ipairs(s.find_entities_filtered{name="wooden-chest",position={0.5,4.5},radius=1}) do e.destroy() end; rcon.print("maintenance-fixture-clean")',
+  );
   assert.deepEqual((await game.observe(1)).errors, [], "Network diagnostics must not emit Lua errors");
   await rcon.sendCommand(
     '/sc local s=game.surfaces[1]; s.create_entity{name="tree-01",position={-6,0}}; rcon.print("tree-ready")',

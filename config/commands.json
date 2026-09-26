@@ -2882,5 +2882,108 @@
       ],
       "additionalProperties": false
     }
+  },
+  "train_set_schedule": {
+    "description": "Set, clear or pause a train schedule using named stations and simple wait conditions.",
+    "execution": "game",
+    "effect": "act",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "trainId": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+        "clear": {"type": "boolean", "default": false},
+        "manualMode": {"type": "boolean"},
+        "group": {"type": "string", "minLength": 1, "maxLength": 200},
+        "current": {"type": "integer", "minimum": 1, "maximum": 100},
+        "records": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "properties": {
+              "station": {"type": "string", "minLength": 1, "maxLength": 200},
+              "waitConditions": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {"type": "string", "enum": ["time", "inactivity", "item-count", "fluid-count", "circuit", "passenger-present", "empty", "full", "robots-inactive"]},
+                    "compareType": {"type": "string", "enum": ["and", "or"]},
+                    "ticks": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+                    "item": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "fluid": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "signal": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "signalType": {"type": "string", "enum": ["item", "fluid", "virtual"]},
+                    "compare": {"type": "string", "enum": [">", ">=", "=", "<=", "<"]},
+                    "count": {"type": "number", "minimum": 0, "maximum": 1000000000}
+                  },
+                  "required": ["type"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["station"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["companionId", "trainId"],
+      "additionalProperties": false
+    }
+  },
+  "fluid_transfer": {
+    "description": "Move a measured amount of fluid between two nearby fluid entities, with rollback on partial insertion.",
+    "execution": "game",
+    "effect": "act",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "fromX": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "fromY": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "toX": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "toY": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "fluid": {"type": "string", "minLength": 1, "maxLength": 200},
+        "amount": {"type": "number", "minimum": 0, "maximum": 1000000},
+        "temperature": {"type": "number", "minimum": -100000, "maximum": 100000},
+        "radius": {"type": "number", "minimum": 0.5, "maximum": 16, "default": 2}
+      },
+      "required": ["companionId", "fromX", "fromY", "toX", "toY", "fluid", "amount"],
+      "additionalProperties": false
+    }
+  },
+  "maintenance_order": {
+    "description": "Mark or cancel deconstruction and upgrade orders in a bounded area.",
+    "execution": "game",
+    "effect": "act",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "action": {"type": "string", "enum": ["deconstruct", "cancel_deconstruct", "upgrade", "cancel_upgrade"]},
+        "x1": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "y1": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "x2": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "y2": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+        "target": {"type": "string", "minLength": 1, "maxLength": 200}
+      },
+      "required": ["companionId", "action", "x1", "y1", "x2", "y2"],
+      "additionalProperties": false
+    }
+  },
+  "space_snapshot": {
+    "description": "List all accessible surfaces and Space Age platforms for the companion's force.",
+    "execution": "game",
+    "effect": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "companionId": {"type": "integer", "minimum": 1, "maximum": 1000}
+      },
+      "required": ["companionId"],
+      "additionalProperties": false
+    }
   }
 }
